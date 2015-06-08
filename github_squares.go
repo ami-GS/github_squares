@@ -61,7 +61,8 @@ func GetString(rects [7][54]Rect) (ans string) {
 	return
 }
 
-func ShowSquare(reqUrl string) {
+func ShowSquare(userName string) {
+	reqUrl := fmt.Sprintf("http://github.com/%s/", userName)
 	rects := GetData(reqUrl)
 	str := GetString(rects)
 	fmt.Println(str)
