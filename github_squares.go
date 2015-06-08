@@ -3,8 +3,23 @@ package github_squares
 import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/ami-GS/soac"
 	"strconv"
 )
+
+var colorMap map[string]byte = map[string]byte{
+	"#d6e685": 156,
+	"#8cc665": 112,
+	"#44a340": 34,
+	"#1e6823": 22,
+	"#eeeeee": 237,
+}
+
+var Changer *soac.Changer
+
+func init() {
+	Changer = soac.NewChanger()
+}
 
 type Rect struct {
 	color string
@@ -35,11 +50,8 @@ func GetString(rects [7][54]Rect) (ans string) {
 	for row := 0; row < 7; row++ {
 		for col := 0; col < 54; col++ {
 			if rects[row][col].date != "" {
-				if rects[row][col].count != 0 {
-					ans += "■"
-				} else {
-					ans += "□"
-				}
+				Changer.Set256(colorMap[rects[row][col].color])
+				ans += Changer.Apply("■")
 			} else {
 				ans += " "
 			}
