@@ -22,16 +22,28 @@ func init() {
 	Changer = soac.NewChanger()
 }
 
+type Contributions struct {
+	rects         [7][54]Rect
+	yearNum       uint16
+	longestStreak uint16
+	currentStreak uint16
+	month         [12]string
+}
+
+func (self Contributions) Get(row, column int) Rect {
+	return self.rects[row][column]
+}
+
 type Rect struct {
 	color string
 	count byte
 	date  string
 }
 
-func GetData(reqUrl string) (results [7][54]Rect, month [12]string) {
+func GetData(reqUrl string) (contrib Contributions) {
 	doc, _ := goquery.NewDocument(reqUrl)
 	column := 0
-
+	rects := [7][54]Rect{}
 	doc.Find("rect").Each(func(_ int, s *goquery.Selection) {
 		yTmp, _ := s.Attr("y")
 		y, _ := strconv.Atoi(yTmp)
@@ -39,13 +51,14 @@ func GetData(reqUrl string) (results [7][54]Rect, month [12]string) {
 		countTmp, _ := s.Attr("data-count")
 		count, _ := strconv.Atoi(countTmp)
 		date, _ := s.Attr("data-date")
-		results[y/13][column] = Rect{color, byte(count), date}
+		rects[y/13][column] = Rect{color, byte(count), date}
 		if y == 78 {
 			column++
 		}
 	})
 
 	m := 0
+	var month [12]string
 	doc.Find("text").Each(func(_ int, s *goquery.Selection) {
 		attr, exists := s.Attr("class")
 		if exists && attr == "month" {
@@ -53,17 +66,38 @@ func GetData(reqUrl string) (results [7][54]Rect, month [12]string) {
 			m++
 		}
 	})
+
+	var yearNum uint16
+	var streaks [2]uint16
+	doc.Find("div[class='contrib-column contrib-column-first table-column']").Each(func(_ int, s *goquery.Selection) {
+		text := s.Find("span[class='contrib-number']").Text()
+		result := strings.Split(text, " ")
+		num, _ := strconv.Atoi(result[0])
+		yearNum = uint16(num)
+	})
+
+	streakIdx := 0
+	doc.Find("div[class='contrib-column table-column']").Each(func(_ int, s *goquery.Selection) {
+		text := s.Find("span[class='contrib-number']").Text()
+		result := strings.Split(text, " ")
+		num, _ := strconv.Atoi(result[0])
+		streaks[streakIdx] = uint16(num)
+		streakIdx++
+	})
+
+	contrib = Contributions{rects, yearNum, streaks[0], streaks[1], month}
 	return
 }
 
-func GetString(rects [7][54]Rect, month [12]string) (ans string) {
+func GetString(contrib Contributions) (ans string) {
 	ans = "  "
 	prev := "00"
 	m := 0
 	for col := 0; col < 54; col++ {
-		mStr := strings.Split(rects[0][col].date, "-")
+		rect := contrib.Get(0, col)
+		mStr := strings.Split(rect.date, "-")
 		if len(mStr) >= 2 && mStr[1] != prev {
-			ans += string(month[m][0])
+			ans += string(contrib.month[m][0])
 			prev = mStr[1]
 			m++
 			if m == 12 {
@@ -88,8 +122,9 @@ func GetString(rects [7][54]Rect, month [12]string) (ans string) {
 		}
 
 		for col := 0; col < 54; col++ {
-			if rects[row][col].date != "" {
-				Changer.Set256(colorMap[rects[row][col].color])
+			rect := contrib.Get(row, col)
+			if rect.date != "" {
+				Changer.Set256(colorMap[rect.color])
 				ans += Changer.Apply("■")
 			} else {
 				ans += " "
@@ -102,7 +137,7 @@ func GetString(rects [7][54]Rect, month [12]string) (ans string) {
 
 func ShowSquare(userName string) {
 	reqUrl := fmt.Sprintf("http://github.com/%s/", userName)
-	rects, month := GetData(reqUrl)
-	str := GetString(rects, month)
+	contrib := GetData(reqUrl)
+	str := GetString(contrib)
 	fmt.Println(str)
 }
