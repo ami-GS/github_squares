@@ -90,12 +90,14 @@ func GetData(reqUrl string) (contrib Contributions) {
 }
 
 func GetString(contrib Contributions) (ans string) {
-	ans = "  "
-	prev := "00"
-	m := 0
-	for col := 0; col < 54; col++ {
-		rect := contrib.Get(0, col)
-		mStr := strings.Split(rect.date, "-")
+	ans = "  " + string(contrib.month[0][0])
+	m := 1
+	rect := contrib.Get(6, 0) // investigate first column month
+	mStr := strings.Split(rect.date, "-")
+	prev := mStr[1]
+	for col := 1; col < 54; col++ {
+		rect = contrib.Get(0, col)
+		mStr = strings.Split(rect.date, "-")
 		if len(mStr) >= 2 && mStr[1] != prev {
 			ans += string(contrib.month[m][0])
 			prev = mStr[1]
