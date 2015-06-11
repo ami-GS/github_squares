@@ -23,5 +23,9 @@ func main() {
 go run ./example/show_github_squares.go USERNAME
 ```
 
+## TODO
+* Retry when scraping is fail
+* Add informations of contributions, and streaks
+
 ### License
 The MIT License (MIT) Copyright (c) 2015 ami-GS
