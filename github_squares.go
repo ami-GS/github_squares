@@ -134,6 +134,15 @@ func GetString(contrib Contributions) (ans string) {
 		}
 		ans += "\n"
 	}
+
+	ans += "========================================================\n"
+	ans += fmt.Sprintf("Contributions in the last year\n   %d total\ndummy -dummy\n", contrib.yearNum)
+	ans += "--------------------------------------------------------\n"
+	ans += fmt.Sprintf("Longest streak\n   %d days\ndummy -dummy\n", contrib.longestStreak)
+	ans += "--------------------------------------------------------\n"
+	ans += fmt.Sprintf("Current streak\n   %d days\ndummy -dummy\n", contrib.longestStreak)
+	ans += "========================================================\n"
+
 	return
 }
 
