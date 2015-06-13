@@ -91,17 +91,17 @@ func NewRect(color string, count byte, date string) *Rect {
 	return &Rect{color, count, date}
 }
 
-func GetString(contrib *Contributions) (ans string) {
-	ans = "  " + string(contrib.month[0][0])
+func (self Contributions) GetString() (ans string) {
+	ans = "  " + string(self.month[0][0])
 	m := 1
-	rect := contrib.Get(6, 0) // investigate first column month
+	rect := self.Get(6, 0) // investigate first column month
 	mStr := strings.Split(rect.date, "-")
 	prev := mStr[1]
 	for col := 1; col < 54; col++ {
-		rect = contrib.Get(0, col)
+		rect = self.Get(0, col)
 		mStr = strings.Split(rect.date, "-")
 		if len(mStr) >= 2 && mStr[1] != prev {
-			ans += string(contrib.month[m][0])
+			ans += string(self.month[m][0])
 			prev = mStr[1]
 			m++
 			if m == 12 {
@@ -126,7 +126,7 @@ func GetString(contrib *Contributions) (ans string) {
 		}
 
 		for col := 0; col < 54; col++ {
-			rect := contrib.Get(row, col)
+			rect := self.Get(row, col)
 			if rect != nil && rect.date != "" {
 				Changer.Set256(colorMap[rect.color])
 				ans += Changer.Apply("■")
@@ -138,11 +138,11 @@ func GetString(contrib *Contributions) (ans string) {
 	}
 
 	ans += "========================================================\n"
-	ans += contrib.yearContrib.String()
+	ans += self.yearContrib.String()
 	ans += "--------------------------------------------------------\n"
-	ans += contrib.longestStreak.String()
+	ans += self.longestStreak.String()
 	ans += "--------------------------------------------------------\n"
-	ans += contrib.currentStreak.String()
+	ans += self.currentStreak.String()
 	ans += "========================================================\n"
 
 	return
@@ -151,6 +151,6 @@ func GetString(contrib *Contributions) (ans string) {
 func ShowSquare(userName string) {
 	reqUrl := fmt.Sprintf("http://github.com/%s/", userName)
 	contrib := NewContributions(reqUrl)
-	str := GetString(contrib)
+	str := contrib.GetString()
 	fmt.Println(str)
 }
