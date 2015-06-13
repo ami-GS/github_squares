@@ -22,11 +22,20 @@ func init() {
 	Changer = soac.NewChanger()
 }
 
+type NumInfo struct {
+	infoStr string
+	num     uint16
+}
+
+func (self NumInfo) String() string {
+	return fmt.Sprintf("%s\n", self.infoStr)
+}
+
 type Contributions struct {
 	rects         [7][54]Rect
-	yearNum       uint16
-	longestStreak uint16
-	currentStreak uint16
+	yearContrib   NumInfo
+	longestStreak NumInfo
+	currentStreak NumInfo
 	month         [12]string
 }
 
@@ -67,21 +76,23 @@ func GetData(reqUrl string) (contrib Contributions) {
 		}
 	})
 
-	var yearNum uint16
-	var streaks [2]uint16
+	var yearNum NumInfo
+	var streaks [2]NumInfo
 	doc.Find("div[class='contrib-column contrib-column-first table-column']").Each(func(_ int, s *goquery.Selection) {
-		text := s.Find("span[class='contrib-number']").Text()
-		result := strings.Split(text, " ")
-		num, _ := strconv.Atoi(result[0])
-		yearNum = uint16(num)
+		text := s.Text()
+		numText := s.Find("span[class='contrib-number']").Text()
+		numResult := strings.Split(numText, " ")
+		num, _ := strconv.Atoi(numResult[0])
+		yearNum = NumInfo{text, uint16(num)}
 	})
 
 	streakIdx := 0
 	doc.Find("div[class='contrib-column table-column']").Each(func(_ int, s *goquery.Selection) {
-		text := s.Find("span[class='contrib-number']").Text()
-		result := strings.Split(text, " ")
-		num, _ := strconv.Atoi(result[0])
-		streaks[streakIdx] = uint16(num)
+		text := s.Text()
+		numText := s.Find("span[class='contrib-number']").Text()
+		numResult := strings.Split(numText, " ")
+		num, _ := strconv.Atoi(numResult[0])
+		streaks[streakIdx] = NumInfo{text, uint16(num)}
 		streakIdx++
 	})
 
@@ -136,11 +147,11 @@ func GetString(contrib Contributions) (ans string) {
 	}
 
 	ans += "========================================================\n"
-	ans += fmt.Sprintf("Contributions in the last year\n   %d total\ndummy -dummy\n", contrib.yearNum)
+	ans += contrib.yearContrib.String()
 	ans += "--------------------------------------------------------\n"
-	ans += fmt.Sprintf("Longest streak\n   %d days\ndummy -dummy\n", contrib.longestStreak)
+	ans += contrib.longestStreak.String()
 	ans += "--------------------------------------------------------\n"
-	ans += fmt.Sprintf("Current streak\n   %d days\ndummy -dummy\n", contrib.longestStreak)
+	ans += contrib.currentStreak.String()
 	ans += "========================================================\n"
 
 	return
