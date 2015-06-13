@@ -12,29 +12,23 @@ type NumInfo struct {
 	num     uint16
 }
 
+func NewNumInfo(infoStr string, num uint16) *NumInfo {
+	return &NumInfo{infoStr, num}
+}
+
 func (self NumInfo) String() string {
 	return fmt.Sprintf("%s\n", self.infoStr)
 }
 
 type Contributions struct {
 	rects         [7][54]*Rect
-	yearContrib   NumInfo
-	longestStreak NumInfo
-	currentStreak NumInfo
+	yearContrib   *NumInfo
+	longestStreak *NumInfo
+	currentStreak *NumInfo
 	month         [12]string
 }
 
-func (self Contributions) Get(row, column int) *Rect {
-	return self.rects[row][column]
-}
-
-type Rect struct {
-	color string
-	count byte
-	date  string
-}
-
-func GetData(reqUrl string) (contrib *Contributions) {
+func NewContributions(reqUrl string) *Contributions {
 	doc, _ := goquery.NewDocument(reqUrl)
 	column := 0
 	rects := [7][54]*Rect{}
@@ -45,7 +39,7 @@ func GetData(reqUrl string) (contrib *Contributions) {
 		countTmp, _ := s.Attr("data-count")
 		count, _ := strconv.Atoi(countTmp)
 		date, _ := s.Attr("data-date")
-		rects[y/13][column] = &Rect{color, byte(count), date}
+		rects[y/13][column] = NewRect(color, byte(count), date)
 		if y == 78 {
 			column++
 		}
@@ -61,14 +55,14 @@ func GetData(reqUrl string) (contrib *Contributions) {
 		}
 	})
 
-	var yearNum NumInfo
-	var streaks [2]NumInfo
+	var yearNum *NumInfo
+	var streaks [2]*NumInfo
 	doc.Find("div[class='contrib-column contrib-column-first table-column']").Each(func(_ int, s *goquery.Selection) {
 		text := s.Text()
 		numText := s.Find("span[class='contrib-number']").Text()
 		numResult := strings.Split(numText, " ")
 		num, _ := strconv.Atoi(numResult[0])
-		yearNum = NumInfo{text, uint16(num)}
+		yearNum = NewNumInfo(text, uint16(num))
 	})
 
 	streakIdx := 0
@@ -77,12 +71,24 @@ func GetData(reqUrl string) (contrib *Contributions) {
 		numText := s.Find("span[class='contrib-number']").Text()
 		numResult := strings.Split(numText, " ")
 		num, _ := strconv.Atoi(numResult[0])
-		streaks[streakIdx] = NumInfo{text, uint16(num)}
+		streaks[streakIdx] = NewNumInfo(text, uint16(num))
 		streakIdx++
 	})
+	return &Contributions{rects, yearNum, streaks[0], streaks[1], month}
+}
 
-	contrib = &Contributions{rects, yearNum, streaks[0], streaks[1], month}
-	return
+func (self Contributions) Get(row, column int) *Rect {
+	return self.rects[row][column]
+}
+
+type Rect struct {
+	color string
+	count byte
+	date  string
+}
+
+func NewRect(color string, count byte, date string) *Rect {
+	return &Rect{color, count, date}
 }
 
 func GetString(contrib *Contributions) (ans string) {
@@ -144,7 +150,7 @@ func GetString(contrib *Contributions) (ans string) {
 
 func ShowSquare(userName string) {
 	reqUrl := fmt.Sprintf("http://github.com/%s/", userName)
-	contrib := GetData(reqUrl)
+	contrib := NewContributions(reqUrl)
 	str := GetString(contrib)
 	fmt.Println(str)
 }
