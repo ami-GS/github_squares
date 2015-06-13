@@ -32,14 +32,14 @@ func (self NumInfo) String() string {
 }
 
 type Contributions struct {
-	rects         [7][54]Rect
+	rects         [7][54]*Rect
 	yearContrib   NumInfo
 	longestStreak NumInfo
 	currentStreak NumInfo
 	month         [12]string
 }
 
-func (self Contributions) Get(row, column int) Rect {
+func (self Contributions) Get(row, column int) *Rect {
 	return self.rects[row][column]
 }
 
@@ -49,10 +49,10 @@ type Rect struct {
 	date  string
 }
 
-func GetData(reqUrl string) (contrib Contributions) {
+func GetData(reqUrl string) (contrib *Contributions) {
 	doc, _ := goquery.NewDocument(reqUrl)
 	column := 0
-	rects := [7][54]Rect{}
+	rects := [7][54]*Rect{}
 	doc.Find("rect").Each(func(_ int, s *goquery.Selection) {
 		yTmp, _ := s.Attr("y")
 		y, _ := strconv.Atoi(yTmp)
@@ -60,7 +60,7 @@ func GetData(reqUrl string) (contrib Contributions) {
 		countTmp, _ := s.Attr("data-count")
 		count, _ := strconv.Atoi(countTmp)
 		date, _ := s.Attr("data-date")
-		rects[y/13][column] = Rect{color, byte(count), date}
+		rects[y/13][column] = &Rect{color, byte(count), date}
 		if y == 78 {
 			column++
 		}
@@ -96,11 +96,11 @@ func GetData(reqUrl string) (contrib Contributions) {
 		streakIdx++
 	})
 
-	contrib = Contributions{rects, yearNum, streaks[0], streaks[1], month}
+	contrib = &Contributions{rects, yearNum, streaks[0], streaks[1], month}
 	return
 }
 
-func GetString(contrib Contributions) (ans string) {
+func GetString(contrib *Contributions) (ans string) {
 	ans = "  " + string(contrib.month[0][0])
 	m := 1
 	rect := contrib.Get(6, 0) // investigate first column month
@@ -136,7 +136,7 @@ func GetString(contrib Contributions) (ans string) {
 
 		for col := 0; col < 54; col++ {
 			rect := contrib.Get(row, col)
-			if rect.date != "" {
+			if rect != nil && rect.date != "" {
 				Changer.Set256(colorMap[rect.color])
 				ans += Changer.Apply("■")
 			} else {
