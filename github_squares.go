@@ -10,10 +10,18 @@ import (
 type NumInfo struct {
 	infoStr string
 	num     uint16
+	days    string
 }
 
 func NewNumInfo(infoStr string, num uint16) *NumInfo {
-	return &NumInfo{infoStr, num}
+	text := strings.Replace(infoStr, "–\n              ", "– ", 1)
+	days := ""
+	for _, v := range strings.Split(text, "\n") {
+		if strings.Contains(v, "–") {
+			days += strings.TrimSpace(v)
+		}
+	}
+	return &NumInfo{infoStr, num, days}
 }
 
 func (self NumInfo) String() string {
@@ -138,11 +146,11 @@ func (self Contributions) GetString() (ans string) {
 	}
 
 	ans += "========================================================\n"
-	ans += self.yearContrib.String()
+	ans += fmt.Sprintf("\tContributions in the last year\n\t\t%d total\n\t%s\n", self.yearContrib.num, self.yearContrib.days)
 	ans += "--------------------------------------------------------\n"
-	ans += self.longestStreak.String()
+	ans += fmt.Sprintf("\tLongest streak\n\t\t%d days\n\t%s\n", self.longestStreak.num, self.longestStreak.days)
 	ans += "--------------------------------------------------------\n"
-	ans += self.currentStreak.String()
+	ans += fmt.Sprintf("\tCurrent streak\n\t\t%d days\n\t%s\n", self.currentStreak.num, self.currentStreak.days)
 	ans += "========================================================\n"
 
 	return
