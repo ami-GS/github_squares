@@ -23,9 +23,11 @@ func main() {
 go run ./example/show_github_squares.go USERNAME
 ```
 
+## Result
+![alt tag](https://raw.github.com/ami-GS/github_squares/master/image/example.png)
+
 ## TODO
-* Retry when scraping is fail
-* Add informations of contributions, and streaks
+* Retry when scraping failed
 
 ### License
 The MIT License (MIT) Copyright (c) 2015 ami-GS
