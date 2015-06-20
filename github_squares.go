@@ -25,7 +25,14 @@ func NewNumInfo(infoStr string, num uint16) *NumInfo {
 }
 
 func (self NumInfo) String() string {
-	return fmt.Sprintf("%s\n", self.infoStr)
+	if strings.Contains(self.infoStr, "Contributions") {
+		return fmt.Sprintf("\tContributions in the last year\n\t\t%d total\n\t%s\n", self.num, self.days)
+	} else if strings.Contains(self.infoStr, "Longest streak") {
+		return fmt.Sprintf("\tLongest streak\n\t\t%d days\n\t%s\n", self.num, self.days)
+	} else if strings.Contains(self.infoStr, "Current streak") {
+		return fmt.Sprintf("\tCurrent streak\n\t\t%d days\n\t%s\n", self.num, self.days)
+	}
+	return ""
 }
 
 type Contributions struct {
@@ -146,11 +153,11 @@ func (self Contributions) GetString() (ans string) {
 	}
 
 	ans += "========================================================\n"
-	ans += fmt.Sprintf("\tContributions in the last year\n\t\t%d total\n\t%s\n", self.yearContrib.num, self.yearContrib.days)
+	ans += self.yearContrib.String()
 	ans += "--------------------------------------------------------\n"
-	ans += fmt.Sprintf("\tLongest streak\n\t\t%d days\n\t%s\n", self.longestStreak.num, self.longestStreak.days)
+	ans += self.longestStreak.String()
 	ans += "--------------------------------------------------------\n"
-	ans += fmt.Sprintf("\tCurrent streak\n\t\t%d days\n\t%s\n", self.currentStreak.num, self.currentStreak.days)
+	ans += self.currentStreak.String()
 	ans += "========================================================\n"
 
 	return
