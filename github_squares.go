@@ -39,7 +39,7 @@ type Contributions struct {
 	yearContrib   *NumInfo
 	longestStreak *NumInfo
 	currentStreak *NumInfo
-	month         [12]string
+	month         [14]string
 }
 
 func NewContributions(reqUrl string) *Contributions {
@@ -60,7 +60,7 @@ func NewContributions(reqUrl string) *Contributions {
 	})
 
 	m := 0
-	var month [12]string
+	var month [14]string // sometimes 12 or 13
 	doc.Find("text").Each(func(_ int, s *goquery.Selection) {
 		attr, exists := s.Attr("class")
 		if exists && attr == "month" {
@@ -110,7 +110,7 @@ func (self Contributions) GetString() (ans string) {
 			ans += string(self.month[m][0])
 			prev = mStr[1]
 			m++
-			if m == 12 {
+			if self.month[m] == "" {
 				break
 			}
 		} else {
