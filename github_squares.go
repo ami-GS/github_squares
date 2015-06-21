@@ -8,31 +8,28 @@ import (
 )
 
 type NumInfo struct {
-	infoStr string
-	num     uint16
-	days    string
+	title string
+	num   uint16
+	days  string
 }
 
 func NewNumInfo(infoStr string, num uint16) *NumInfo {
 	text := strings.Replace(infoStr, "–\n              ", "– ", 1)
 	days := ""
+	title := ""
 	for _, v := range strings.Split(text, "\n") {
+		if len(v) != 0 && len(title) == 0 {
+			title = strings.TrimSpace(v)
+		}
 		if strings.Contains(v, "–") {
 			days += strings.TrimSpace(v)
 		}
 	}
-	return &NumInfo{infoStr, num, days}
+	return &NumInfo{title, num, days}
 }
 
 func (self NumInfo) String() string {
-	if strings.Contains(self.infoStr, "Contributions") {
-		return fmt.Sprintf("\tContributions in the last year\n\t\t%d total\n\t%s\n", self.num, self.days)
-	} else if strings.Contains(self.infoStr, "Longest streak") {
-		return fmt.Sprintf("\tLongest streak\n\t\t%d days\n\t%s\n", self.num, self.days)
-	} else if strings.Contains(self.infoStr, "Current streak") {
-		return fmt.Sprintf("\tCurrent streak\n\t\t%d days\n\t%s\n", self.num, self.days)
-	}
-	return ""
+	return fmt.Sprintf("\t%s\n\t\t%d total\n\t%s\n", self.title, self.num, self.days)
 }
 
 type Contributions struct {
