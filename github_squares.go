@@ -9,19 +9,21 @@ import (
 
 type NumInfo struct {
 	title string
-	num   uint16
+	num   string
 	days  string
 }
 
-func NewNumInfo(infoStr string, num uint16) *NumInfo {
+func NewNumInfo(infoStr string) *NumInfo {
 	text := strings.Replace(infoStr, "–\n              ", "– ", 1)
 	days := ""
 	title := ""
+	num := ""
 	for _, v := range strings.Split(text, "\n") {
 		if len(v) != 0 && len(title) == 0 {
 			title = strings.TrimSpace(v)
-		}
-		if strings.Contains(v, "–") {
+		} else if len(title) != 0 && len(num) == 0 {
+			num = strings.TrimSpace(v)
+		} else if strings.Contains(v, "–") {
 			days += strings.TrimSpace(v)
 		}
 	}
@@ -29,7 +31,7 @@ func NewNumInfo(infoStr string, num uint16) *NumInfo {
 }
 
 func (self NumInfo) String() string {
-	return fmt.Sprintf("\t%s\n\t\t%d total\n\t%s\n", self.title, self.num, self.days)
+	return fmt.Sprintf("\t%s\n\t\t%s\n\t%s\n", self.title, self.num, self.days)
 }
 
 type Contributions struct {
@@ -70,20 +72,12 @@ func NewContributions(reqUrl string) *Contributions {
 	var yearNum *NumInfo
 	var streaks [2]*NumInfo
 	doc.Find("div[class='contrib-column contrib-column-first table-column']").Each(func(_ int, s *goquery.Selection) {
-		text := s.Text()
-		numText := s.Find("span[class='contrib-number']").Text()
-		numResult := strings.Split(numText, " ")
-		num, _ := strconv.Atoi(numResult[0])
-		yearNum = NewNumInfo(text, uint16(num))
+		yearNum = NewNumInfo(s.Text())
 	})
 
 	streakIdx := 0
 	doc.Find("div[class='contrib-column table-column']").Each(func(_ int, s *goquery.Selection) {
-		text := s.Text()
-		numText := s.Find("span[class='contrib-number']").Text()
-		numResult := strings.Split(numText, " ")
-		num, _ := strconv.Atoi(numResult[0])
-		streaks[streakIdx] = NewNumInfo(text, uint16(num))
+		streaks[streakIdx] = NewNumInfo(s.Text())
 		streakIdx++
 	})
 	return &Contributions{rects, yearNum, streaks[0], streaks[1], month}
