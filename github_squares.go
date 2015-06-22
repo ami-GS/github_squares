@@ -3,6 +3,7 @@ package github_squares
 import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -154,9 +155,11 @@ func (self Contributions) GetString() (ans string) {
 	return
 }
 
-func ShowSquare(userName string) {
-	reqUrl := fmt.Sprintf("http://github.com/%s/", userName)
-	contrib := NewContributions(reqUrl)
-	str := contrib.GetString()
-	fmt.Println(str)
+func ShowSquare() {
+	if len(os.Args) >= 2 {
+		reqUrl := fmt.Sprintf("http://github.com/%s/", os.Args[1])
+		contrib := NewContributions(reqUrl)
+		str := contrib.GetString()
+		fmt.Println(str)
+	}
 }
