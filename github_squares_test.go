@@ -2,10 +2,17 @@ package github_squares
 
 import (
 	"fmt"
-	//"github.com/PuerkitoBio/goquery"
 	"reflect"
 	"testing"
 )
+
+var numInfo *NumInfo
+
+func init() {
+	infoStr := "Contributions in the last year\n920 total\nJun 23, 2014 – Jun 23, 2015"
+	numInfo = NewNumInfo(infoStr)
+
+}
 
 func TestNewRect(t *testing.T) {
 	color := "#d6e685"
@@ -41,5 +48,12 @@ func TestNewContributions(t *testing.T) {
 	if actual == expect {
 		t.Errorf("got %v\nwant %v", actual, expect)
 	}
+}
 
+func TestString(t *testing.T) {
+	actual := numInfo.String()
+	expect := "\tContributions in the last year\n\t\t920 total\n\tJun 23, 2014 – Jun 23, 2015\n"
+	if actual != expect {
+		t.Errorf("got %v\nwant %v", actual, expect)
+	}
 }
