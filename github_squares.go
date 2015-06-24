@@ -98,7 +98,7 @@ func NewRect(color string, count byte, date string) *Rect {
 	return &Rect{color, count, date}
 }
 
-func (self Contributions) GetString() (ans string) {
+func (self Contributions) GetString(symbol string) (ans string) {
 	ans = "  " + string(self.month[0][0])
 	m := 1
 	rect := self.Get(6, 0) // investigate first column month
@@ -136,7 +136,7 @@ func (self Contributions) GetString() (ans string) {
 			rect := self.Get(row, col)
 			if rect != nil && rect.date != "" {
 				Changer.Set256(colorMap[rect.color])
-				ans += Changer.Apply("■")
+				ans += Changer.Apply(symbol)
 			} else {
 				ans += " "
 			}
@@ -156,10 +156,15 @@ func (self Contributions) GetString() (ans string) {
 }
 
 func ShowSquare() {
-	if len(os.Args) >= 2 {
+	argNum := len(os.Args)
+	if argNum >= 2 {
 		reqUrl := fmt.Sprintf("http://github.com/%s/", os.Args[1])
 		contrib := NewContributions(reqUrl)
-		str := contrib.GetString()
+		symbol := "■"
+		if argNum >= 4 && os.Args[2] == "-c" {
+			symbol = string(os.Args[3][0])
+		}
+		str := contrib.GetString(symbol)
 		fmt.Println(str)
 	}
 }
