@@ -35,12 +35,21 @@ func (self NumInfo) String() string {
 	return fmt.Sprintf("\t%s\n\t\t%s\n\t%s\n", self.title, self.num, self.days)
 }
 
+type Month struct {
+	x    byte
+	name string
+}
+
+func (self Month) Initial() string {
+	return string(self.name[0])
+}
+
 type Contributions struct {
 	rects         [7][54]*Rect
 	yearContrib   *NumInfo
 	longestStreak *NumInfo
 	currentStreak *NumInfo
-	month         [14]string
+	month         [14]*Month
 }
 
 func NewContributions(reqUrl string) *Contributions {
@@ -61,11 +70,13 @@ func NewContributions(reqUrl string) *Contributions {
 	})
 
 	m := 0
-	var month [14]string // sometimes 12 or 13
+	var months [14]*Month // sometimes 12 or 13
 	doc.Find("text").Each(func(_ int, s *goquery.Selection) {
 		attr, exists := s.Attr("class")
 		if exists && attr == "month" {
-			month[m] = s.Text()
+			strX, _ := s.Attr("x")
+			x, _ := strconv.Atoi(strX)
+			months[m] = &Month{byte(x / 13), s.Text()}
 			m++
 		}
 	})
@@ -81,7 +92,7 @@ func NewContributions(reqUrl string) *Contributions {
 		streaks[streakIdx] = NewNumInfo(s.Text())
 		streakIdx++
 	})
-	return &Contributions{rects, yearNum, streaks[0], streaks[1], month}
+	return &Contributions{rects, yearNum, streaks[0], streaks[1], months}
 }
 
 func (self Contributions) Get(row, column int) *Rect {
@@ -99,21 +110,12 @@ func NewRect(color string, count byte, date string) *Rect {
 }
 
 func (self Contributions) GetString(symbol string) (ans string) {
-	ans = "  " + string(self.month[0][0])
-	m := 1
-	rect := self.Get(6, 0) // investigate first column month
-	mStr := strings.Split(rect.date, "-")
-	prev := mStr[1]
-	for col := 1; col < 54; col++ {
-		rect = self.Get(0, col)
-		mStr = strings.Split(rect.date, "-")
-		if len(mStr) >= 2 && mStr[1] != prev {
-			ans += string(self.month[m][0])
-			prev = mStr[1]
+	ans = "  "
+	m := 0
+	for col := 0; col < 54 && self.month[m] != nil; col++ {
+		if col == int(self.month[m].x) {
+			ans += self.month[m].Initial()
 			m++
-			if self.month[m] == "" {
-				break
-			}
 		} else {
 			ans += " "
 		}
