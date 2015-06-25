@@ -52,11 +52,13 @@ type Contributions struct {
 	month         [14]*Month
 }
 
-func NewContributions(reqUrl string) *Contributions {
-	doc, _ := goquery.NewDocument(reqUrl)
+func NewContributions(userID string) *Contributions {
+	contribDoc, _ := goquery.NewDocument(
+		fmt.Sprintf("https://github.com/users/%s/contributions", userID))
+
 	column := 0
 	rects := [7][54]*Rect{}
-	doc.Find("rect").Each(func(_ int, s *goquery.Selection) {
+	contribDoc.Find("rect").Each(func(_ int, s *goquery.Selection) {
 		yTmp, _ := s.Attr("y")
 		y, _ := strconv.Atoi(yTmp)
 		color, _ := s.Attr("fill")
@@ -71,7 +73,7 @@ func NewContributions(reqUrl string) *Contributions {
 
 	m := 0
 	var months [14]*Month // sometimes 12 or 13
-	doc.Find("text").Each(func(_ int, s *goquery.Selection) {
+	contribDoc.Find("text").Each(func(_ int, s *goquery.Selection) {
 		attr, exists := s.Attr("class")
 		if exists && attr == "month" {
 			strX, _ := s.Attr("x")
@@ -81,6 +83,8 @@ func NewContributions(reqUrl string) *Contributions {
 		}
 	})
 
+	doc, _ := goquery.NewDocument(
+		fmt.Sprintf("https://github.com/%s", userID))
 	var yearNum *NumInfo
 	var streaks [2]*NumInfo
 	doc.Find("div[class='contrib-column contrib-column-first table-column']").Each(func(_ int, s *goquery.Selection) {
@@ -160,8 +164,7 @@ func (self Contributions) GetString(symbol string) (ans string) {
 func ShowSquare() {
 	argNum := len(os.Args)
 	if argNum >= 2 {
-		reqUrl := fmt.Sprintf("http://github.com/%s/", os.Args[1])
-		contrib := NewContributions(reqUrl)
+		contrib := NewContributions(os.Args[1])
 		symbol := "■"
 		if argNum >= 4 && os.Args[2] == "-c" {
 			symbol = string(os.Args[3][0])
