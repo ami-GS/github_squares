@@ -43,8 +43,8 @@ func TestNewContributions(t *testing.T) {
 	actual := NewContributions(reqUrl)
 	infoStr := "Contributions in the last year\n920 total\nJun 23, 2014 – Jun 23, 2015"
 	var rects [7][54]*Rect
-	var month [14]string
-	expect := &Contributions{rects, NewNumInfo(infoStr), NewNumInfo(infoStr), NewNumInfo(infoStr), month}
+	var months [14]*Month
+	expect := &Contributions{rects, NewNumInfo(infoStr), NewNumInfo(infoStr), NewNumInfo(infoStr), months}
 	if actual == expect {
 		t.Errorf("got %v\nwant %v", actual, expect)
 	}
