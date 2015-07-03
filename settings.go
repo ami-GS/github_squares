@@ -1,7 +1,7 @@
 package github_squares
 
 import (
-	"github.com/ami-GS/soac"
+	"github.com/ami-GS/soac/go"
 )
 
 var colorMap map[string]byte = map[string]byte{
